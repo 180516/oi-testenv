@@ -23,7 +23,10 @@ public class TeachingService {
     public void teach() throws InterruptedException {
         File dir = Paths.get(teachingPatternsDirPath).toFile();
         Arrays.asList(dir.listFiles()).forEach(file -> LOGGER.info("Found teaching pattern map: {}", file.getName()));
-        LOGGER.info("Found perfect map: {}", Paths.get(perfectMapPath).toFile().getName());
+        File map = Paths.get(perfectMapPath).toFile();
+        if(map.exists()) {
+            LOGGER.info("Found perfect map: {}", map.getName());
+        }
         Thread.sleep(5000);
     }
 }

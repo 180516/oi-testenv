@@ -27,7 +27,10 @@ public class TestingService {
     private String outputMapPath;
 
     public void test() throws InterruptedException, IOException {
-        LOGGER.info("Found testing map: {}", Paths.get(testingMapPath).toFile().getName());
+        File map = Paths.get(testingMapPath).toFile();
+        if(map.exists()) {
+            LOGGER.info("Found testing map: {}", map.getName());
+        }
         Thread.sleep(5000);
         saveRandomImage();
         LOGGER.info("Generated output map: {}", outputMapPath);
