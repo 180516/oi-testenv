@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="BSQImage">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../BSQImage" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../BSQImage/src/main/java" />
+    </SOURCES>
+  </library>
+</component>
