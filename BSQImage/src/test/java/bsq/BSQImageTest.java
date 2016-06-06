@@ -1,6 +1,5 @@
 package bsq;
 
-import bsq.BSQImage;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,16 +35,27 @@ public class BSQImageTest {
 
     @Test
     public void shouldReturn_PixelOfCorrectSize() throws IOException {
-        assertEquals(image.pixel(5, 5).length, 2);
+        assertEquals(image.pixels().get(5, 5).length, 2);
     }
 
     @Test
     public void shouldReturn_PixelOfCorrectValues() throws IOException {
-        assertArrayEquals(image.pixel(0, 0), new int[] {255, 144});
+        assertArrayEquals(image.pixels().get(0, 0), new int[]{255, 144});
     }
 
     @Test
     public void shouldReturn_LastPixelOfCorrectValues() throws IOException {
-        assertArrayEquals(image.pixel(5, 5), new int[] {52, 94});
+        assertArrayEquals(image.pixels().get(5, 5), new int[]{52, 94});
+    }
+
+    @Test
+    public void shouldReturn_MultiplePixelsOfCorrectValues() throws Exception {
+        int[] first, second;
+        try (BSQPixels pixels = image.pixels()) {
+            first = pixels.get(0, 0);
+            second = pixels.get(5, 5);
+        }
+        assertArrayEquals(first, new int[]{255, 144});
+        assertArrayEquals(second, new int[]{52, 94});
     }
 }
