@@ -58,14 +58,13 @@ public class TeachingService {
                 trainingSet.addRow(new DataSetRow(inputValues.get(i), new double[]{outputValues[i]}));
             }
         }
-//        for (int i = 0; i < 255; i++) {
-//                trainingSet.addRow(new DataSetRow(new double[]{ i, i}, new double[]{(i / 255.0)}));
-//        }
         MultiLayerPerceptron myMlPerceptron = new MultiLayerPerceptron(TransferFunctionType.TANH, 2, 8, 1);
         MomentumBackpropagation momentumBackpropagation = new MomentumBackpropagation();
         momentumBackpropagation.setMaxIterations(5000);
         LOGGER.info("Teaching started");
-        myMlPerceptron.learn(trainingSet, momentumBackpropagation);
+        for (int i = 0; i < 100; i++) {
+            myMlPerceptron.learn(trainingSet, momentumBackpropagation);
+        }
         LOGGER.info("Teaching ended");
         myMlPerceptron.save(weightsFilePath);
 
