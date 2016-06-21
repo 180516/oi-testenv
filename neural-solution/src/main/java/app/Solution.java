@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Solution {
@@ -38,7 +37,8 @@ public class Solution {
         try (BSQPixels pixels = image.pixels()) {
             for (int i = 0; i < image.dimension().height; i++) {
                 for (int j = 0; j < image.dimension().width; j++) {
-                    if (getNeuralOutput(pixels.get(j, i)) > 0.5) {
+                    double neuralOutput = getNeuralOutput(normalize(pixels.get(j, i)));
+                    if (neuralOutput > 0.5) {
                         output.setRGB(j, i, Color.black.getRGB());
                     } else {
                         output.setRGB(j, i, Color.white.getRGB());
@@ -63,7 +63,7 @@ public class Solution {
                 try {
                     int[] pix = referenceImage.getPixel(pair.getLeft(), pair.getRight(), new int[referenceImage.getNumBands()]);
                     dataSet.addRow(new DataSetRow(
-                            intsToDoubleArray(pixels.get(pair.getLeft(), pair.getRight())),
+                            normalize(pixels.get(pair.getLeft(), pair.getRight())),
                             new double[] {isWhite(pix) ? 0 : 1}));
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -80,17 +80,21 @@ public class Solution {
         }
     }
 
+    private double[] normalize(int... input) {
+        return Arrays.stream(input).mapToDouble(i -> i).map(x -> map(x, 0, 255, -1.0, 1.0)).toArray();
+    }
+
+    private double map(double x, double a, double b, double c, double d) {
+        return (x-a)/(b-a)*(d-c)+c;
+    }
+
     private boolean isWhite(int... channels) {
         return Arrays.stream(channels).allMatch(i -> i == 255);
     }
 
-    private double getNeuralOutput(int[] input) {
-        neuralNetwork.setInput(intsToDoubleArray(input));
+    private double getNeuralOutput(double[] input) {
+        neuralNetwork.setInput(input);
         neuralNetwork.calculate();
         return neuralNetwork.getOutput()[0];
-    }
-
-    private double[] intsToDoubleArray(int... ints) {
-        return IntStream.of(ints).asDoubleStream().toArray();
     }
 }

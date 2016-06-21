@@ -34,7 +34,7 @@ public class NeuralSolution {
             width = Integer.valueOf(reader.readLine());
             height = Integer.valueOf(reader.readLine());
         }
-        int maxIterations, hiddenLayers;
+        int maxIterations, hiddenLayers, pixelRadius;
         int[] neuronsInLayer;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(paramsFile)))) {
             hiddenLayers = Integer.valueOf(reader.readLine());
@@ -43,11 +43,12 @@ public class NeuralSolution {
                 neuronsInLayer[i] = Integer.valueOf(reader.readLine());
             }
             maxIterations = Integer.valueOf(reader.readLine());
+            pixelRadius = Integer.valueOf(reader.readLine());
         }
 
         long start = System.currentTimeMillis();
         BufferedImage solution =
-                new Solution(new BSQImage(imageFile, bands, new Dimension(width, height)), maxIterations, neuronsInLayer).generate();
+                new Solution(new BSQImage(imageFile, bands, new Dimension(width, height)), maxIterations, pixelRadius, neuronsInLayer).generate();
         long end = System.currentTimeMillis();
         System.out.println(String.format("Solution found in %d ms", end - start));
 
