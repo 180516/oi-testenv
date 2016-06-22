@@ -1,9 +1,12 @@
 #!/bin/bash
 
-DIR=$(pwd)
-cd $1
-java -jar Solution.jar
-OUT=$(readlink -e output.png)
-cd $DIR
+SOLUTION_DIR=$1
+DATA_TYPE=$2
+RUN_DIR=$(pwd)
+cd $SOLUTION_DIR
+#java -jar Solution.jar
+RES_DIR=$(readlink -e results)
+cd $RUN_DIR
 cd run
-java -jar QualityEvaluation.jar $OUT reference.png
+REF_DIR=$(readlink -e test_data/references)
+java -jar QualityEvaluation.jar $DATA_TYPE $RES_DIR $REF_DIR
