@@ -36,16 +36,19 @@ public class BSQImageTest {
     @Test
     public void shouldReturn_PixelOfCorrectSize() throws IOException {
         assertEquals(image.pixels().get(5, 5).length, 2);
+        assertEquals(image.inMemoryPixels().get(5, 5).length, 2);
     }
 
     @Test
     public void shouldReturn_PixelOfCorrectValues() throws IOException {
         assertArrayEquals(image.pixels().get(0, 0), new int[]{255, 144});
+        assertArrayEquals(image.inMemoryPixels().get(0, 0), new int[]{255, 144});
     }
 
     @Test
     public void shouldReturn_LastPixelOfCorrectValues() throws IOException {
         assertArrayEquals(image.pixels().get(5, 5), new int[]{52, 94});
+        assertArrayEquals(image.inMemoryPixels().get(5, 5), new int[]{52, 94});
     }
 
     @Test
@@ -57,5 +60,12 @@ public class BSQImageTest {
         }
         assertArrayEquals(first, new int[]{255, 144});
         assertArrayEquals(second, new int[]{52, 94});
+    }
+
+    @Test
+    public void shouldReturn_MultiplePixelsOfCorrectValuesInMemory() throws Exception {
+        InMemoryPixels pixels = image.inMemoryPixels();
+        assertArrayEquals(pixels.get(0, 0), new int[]{255, 144});
+        assertArrayEquals(pixels.get(5, 5), new int[]{52, 94});
     }
 }
