@@ -10,7 +10,8 @@ import org.neuroph.core.data.DataSet;
 import org.neuroph.core.data.DataSetRow;
 import org.neuroph.nnet.MultiLayerPerceptron;
 import org.neuroph.nnet.learning.BackPropagation;
-import org.neuroph.nnet.learning.DynamicBackPropagation;
+import org.neuroph.nnet.learning.ResilientPropagation;
+import org.neuroph.util.TransferFunctionType;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -18,7 +19,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,70 +26,59 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Solution {
-
-    private final BSQImage image;
     private NeuralNetwork neuralNetwork;
     private final int radius;
+    private final int inputVectorSize;
 
-    public Solution(BSQImage image, int maxIterations, int radius, int... hiddenLayersNeurons) {
-        this.image = image;
+    public Solution(int bands, int radius, int... hiddenLayersNeurons) {
         this.radius = radius;
         int a = 2 * radius + 1;
+        inputVectorSize = bands * a * a;
         List<Integer> neuronsInLayer = new ArrayList<>();
-        neuronsInLayer.add(image.bands() * a * a);
+        neuronsInLayer.add(inputVectorSize);
         for (int hiddenLayerNeurons : hiddenLayersNeurons) {
             neuronsInLayer.add(hiddenLayerNeurons);
         }
         neuronsInLayer.add(1);
-        this.neuralNetwork = new MultiLayerPerceptron(neuronsInLayer);
-        train(maxIterations);
+        this.neuralNetwork = new MultiLayerPerceptron(neuronsInLayer, TransferFunctionType.SIGMOID);
+        neuralNetwork.randomizeWeights();
     }
 
-    public BufferedImage generate() throws Exception {
+    public BufferedImage generate(BSQImage image) throws Exception {
         BufferedImage output =
                 new BufferedImage(image.dimension().width, image.dimension().height, BufferedImage.TYPE_BYTE_GRAY);
         try (BSQPixels pixels = image.pixels()) {
             for (int i = 0; i < image.dimension().height; i++) {
                 for (int j = 0; j < image.dimension().width; j++) {
-                    double neuralOutput = getNeuralOutput(normalize(
+                    float neuralOutput = (float) getNeuralOutput(normalize(
                             getPixelsBlock(image, pixels, j, i, radius)
                     ));
-                    if (neuralOutput > 0.5) {
-                        output.setRGB(j, i, Color.black.getRGB());
-                    } else {
-                        output.setRGB(j, i, Color.white.getRGB());
-                    }
+                    output.setRGB(j, i, new Color(neuralOutput, neuralOutput, neuralOutput).getRGB());
                 }
             }
         }
         return output;
     }
 
-    private void train(int maxIterations) {
-        neuralNetwork.randomizeWeights();
-        final DataSet dataSet = new DataSet(image.bands());
+    public void train(BSQImage image, int maxIterations) {
+        final DataSet dataSet = new DataSet(inputVectorSize);
         try (BSQPixels pixels = image.pixels()) {
-            File directory;
-            if (getClass().getClassLoader().getResource(".") != null)
-                directory = new File(getClass().getClassLoader().getResource(".").getPath());   //debug
-            else
-                directory = Paths.get(".").toFile();    //release
-            Raster referenceImage = ImageIO.read(new File(directory, "reference.png")).getRaster();
+            File directory = image.getImageFile().toPath().getParent().resolve("references").toFile();
+            Raster referenceImage = ImageIO.read(new File(directory, image.getImageFile().getName().replace(".bsq", ".png"))).getRaster();
             Stream.generate(() -> Pair.of(RandomUtils.nextInt(0, image.dimension().width), RandomUtils.nextInt(0, image.dimension().height))).limit(1000L).forEach(pair -> {
                 int[] pix = referenceImage.getPixel(pair.getLeft(), pair.getRight(), new int[referenceImage.getNumBands()]);
                 int x = pair.getLeft(), y = pair.getRight();
+                double[] inputVector = normalize(getPixelsBlock(image, pixels, x, y, radius));
+                double[] outputVector = getFirstChannel(pix);
                 dataSet.addRow(new DataSetRow(
-                        normalize(
-                                getPixelsBlock(image, pixels, x, y, radius)
-                        ),
-                        new double[] {isWhite(pix) ? 0 : 1}));
+                        inputVector,
+                        outputVector));
             });
-            BackPropagation learning = new DynamicBackPropagation();
+            BackPropagation learning = new ResilientPropagation();
             learning.setMaxIterations(maxIterations);
             System.out.println("Starting learning");
             neuralNetwork.learn(dataSet, learning);
             System.out.println("Finished learning");
-            Stream.of(neuralNetwork.getInputNeurons()).forEach(neuron -> Stream.of(neuron.getWeights()).forEach(weight -> System.out.println(weight.getValue())));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -103,14 +92,14 @@ public class Solution {
         return (x-a)/(b-a)*(d-c)+c;
     }
 
-    private boolean isWhite(int... channels) {
-        return Arrays.stream(channels).allMatch(i -> i == 255);
-    }
-
     private double getNeuralOutput(double[] input) {
         neuralNetwork.setInput(input);
         neuralNetwork.calculate();
         return neuralNetwork.getOutput()[0];
+    }
+
+    private double[] getFirstChannel(int... channels) {
+        return new double[] {normalize(channels)[0]};
     }
 
     private int[] getPixelsInput(BSQImage image, BSQPixels pixels, int x, int y){

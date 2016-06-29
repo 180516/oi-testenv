@@ -4,9 +4,9 @@ SOLUTION_DIR=$1
 DATA_TYPE=$2
 RUN_DIR=$(pwd)
 if [ "$DATA_TYPE" == "ls" ]; then
-	DATA_DIR=$(readlink -e run/data/ls/test)
+	DATA_DIR=$(readlink -e run/data/ls)
 else
-	DATA_DIR=$(readlink -e run/data/sm/test)
+	DATA_DIR=$(readlink -e run/data/sm)
 fi
 cd $SOLUTION_DIR
 java -jar Solution.jar $DATA_DIR $DATA_TYPE
