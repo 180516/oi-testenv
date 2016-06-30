@@ -13,5 +13,5 @@ java -jar Solution.jar $DATA_DIR $DATA_TYPE
 RES_DIR=$(readlink -e results)
 cd $RUN_DIR
 cd run
-REF_DIR=$(readlink -e $DATA_DIR/references)
+REF_DIR=$(readlink -e $DATA_DIR/test/references)
 java -jar QualityEvaluation.jar $DATA_TYPE $RES_DIR $REF_DIR

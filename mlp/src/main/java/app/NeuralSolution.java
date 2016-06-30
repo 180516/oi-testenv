@@ -21,12 +21,12 @@ public class NeuralSolution {
     }
 
     private void run(File dataDirectory) throws Exception {
-        File directory;
+        File solutionDirectory;
         if (getClass().getClassLoader().getResource(".") != null)
-            directory = new File(getClass().getClassLoader().getResource(".").getPath());   //debug
+            solutionDirectory = new File(getClass().getClassLoader().getResource(".").getPath());   //debug
         else
-            directory = Paths.get(".").toFile();    //release
-        File paramsFile = new File(directory, "solution-params.txt");
+            solutionDirectory = Paths.get(".").toFile();    //release
+        File paramsFile = new File(solutionDirectory, "solution-params.txt");
         int inputLayers, maxIterations, hiddenLayers, pixelRadius;
         int[] neuronsInLayer;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(paramsFile)))) {
@@ -54,6 +54,8 @@ public class NeuralSolution {
                 e.printStackTrace();
             }
         });
+        File resultDirectory = new File(solutionDirectory, "results");
+        resultDirectory.mkdir();
         Arrays.stream(dataDirectory.toPath().resolve("test").toFile().listFiles((file, s) -> s.endsWith(".bsq"))).forEach(file -> {
             File propFile = file.toPath().getParent().resolve(file.getName().replace(".bsq", ".txt")).toFile();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(propFile)))) {
@@ -63,7 +65,7 @@ public class NeuralSolution {
                 height = Integer.valueOf(reader.readLine());
                 System.out.println(String.format("Starting testing %s", file.getName()));
                 BufferedImage imageOutput = solution.generate(new BSQImage(file, bands, new Dimension(width, height)));
-                ImageIO.write(imageOutput, "png", new File(dataDirectory, file.getName().replace(".bsq", ".png")));
+                ImageIO.write(imageOutput, "png", new File(resultDirectory, file.getName().replace(".bsq", ".png")));
             } catch (Exception e) {
                 e.printStackTrace();
             }

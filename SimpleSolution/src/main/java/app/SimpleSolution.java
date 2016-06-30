@@ -22,7 +22,7 @@ public class SimpleSolution {
         if (!dataDirectory.isDirectory()) throw new IllegalArgumentException("Given path is not directory");
         String dataType = args[1];
         if (!dataType.equals("ls") && !dataType.equals("sm")) throw new IllegalArgumentException("Illegal data type");
-        new SimpleSolution().run(dataDirectory, dataType);
+        new SimpleSolution().run(new File(dataDirectory, "test"), dataType);
     }
 
     private void run(File dataDirectory, String dataType) throws Exception {
