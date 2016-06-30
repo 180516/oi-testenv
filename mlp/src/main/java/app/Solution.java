@@ -1,7 +1,7 @@
 package app;
 
 import bsq.BSQImage;
-import bsq.BSQPixels;
+import bsq.InMemoryPixels;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -40,29 +40,31 @@ public class Solution {
             neuronsInLayer.add(hiddenLayerNeurons);
         }
         neuronsInLayer.add(1);
-        this.neuralNetwork = new MultiLayerPerceptron(neuronsInLayer, TransferFunctionType.SIGMOID);
+        this.neuralNetwork = new MultiLayerPerceptron(neuronsInLayer, TransferFunctionType.TANH);
         neuralNetwork.randomizeWeights();
     }
 
     public BufferedImage generate(BSQImage image) throws Exception {
         BufferedImage output =
                 new BufferedImage(image.dimension().width, image.dimension().height, BufferedImage.TYPE_BYTE_GRAY);
-        try (BSQPixels pixels = image.pixels()) {
-            for (int i = 0; i < image.dimension().height; i++) {
-                for (int j = 0; j < image.dimension().width; j++) {
-                    float neuralOutput = (float) getNeuralOutput(normalize(
-                            getPixelsBlock(image, pixels, j, i, radius)
-                    ));
-                    output.setRGB(j, i, new Color(neuralOutput, neuralOutput, neuralOutput).getRGB());
-                }
+        InMemoryPixels pixels = image.inMemoryPixels();
+        for (int i = 0; i < image.dimension().height; i++) {
+            for (int j = 0; j < image.dimension().width; j++) {
+                float neuralOutput = (float) getNeuralOutput(normalize(
+                        getPixelsBlock(image, pixels, j, i, radius)
+                ));
+                neuralOutput = (neuralOutput + 1.f) / 2.f;
+                output.setRGB(j, i, new Color(neuralOutput, neuralOutput, neuralOutput).getRGB());
             }
         }
+
         return output;
     }
 
     public void train(BSQImage image, int maxIterations) {
         final DataSet dataSet = new DataSet(inputVectorSize);
-        try (BSQPixels pixels = image.pixels()) {
+        try {
+            InMemoryPixels pixels = image.inMemoryPixels();
             File directory = image.getImageFile().toPath().getParent().resolve("references").toFile();
             Raster referenceImage = ImageIO.read(new File(directory, image.getImageFile().getName().replace(".bsq", ".png"))).getRaster();
             Stream.generate(() -> Pair.of(RandomUtils.nextInt(0, image.dimension().width), RandomUtils.nextInt(0, image.dimension().height))).limit(1000L).forEach(pair -> {
@@ -102,7 +104,7 @@ public class Solution {
         return new double[] {normalize(channels)[0]};
     }
 
-    private int[] getPixelsInput(BSQImage image, BSQPixels pixels, int x, int y){
+    private int[] getPixelsInput(BSQImage image, InMemoryPixels pixels, int x, int y){
         if (x < 0 || x >= image.dimension().width || y < 0 || y >= image.dimension().height) {
             return new int[image.bands()];
         }
@@ -113,7 +115,7 @@ public class Solution {
         }
     }
 
-    private int[] getPixelsBlock(BSQImage image, BSQPixels pixels, int x, int y, int radius) {
+    private int[] getPixelsBlock(BSQImage image, InMemoryPixels pixels, int x, int y, int radius) {
         return IntStream.rangeClosed(x-radius, x+radius).mapToObj(i -> IntStream.rangeClosed(y-radius, y+radius).mapToObj(j -> getPixelsInput(image, pixels, i, j)).reduce(new int[]{}, ArrayUtils::addAll)).reduce(new int[]{}, ArrayUtils::addAll);
     }
 }
