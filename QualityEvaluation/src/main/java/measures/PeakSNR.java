@@ -5,10 +5,9 @@ import java.awt.image.Raster;
 /**
  * Created by Filip-PC on 31.05.2016.
  */
-public class MeanSquareError extends QualityMeasure {
-
+public class PeakSNR extends QualityMeasure {
     @Override
-    public double calculate(Raster result, Raster reference) {
+    protected double calculate(Raster result, Raster reference) {
         double sum = 0;
         for (int i = result.getMinY(); i < result.getMinY() + result.getHeight(); i++) {
             for (int j = result.getMinX(); j < result.getMinX() + result.getWidth(); j++) {
@@ -17,11 +16,11 @@ public class MeanSquareError extends QualityMeasure {
                                 result.getPixel(j, i, new double[result.getNumBands()])[0], 2);
             }
         }
-        return sum / (result.getHeight() * result.getWidth());
+        return 10 * Math.log(result.getHeight() * result.getWidth() * 255 / sum);
     }
 
     @Override
     public String name() {
-        return "Mean Square Error";
+        return "Peak Signal to Noise Ratio";
     }
 }

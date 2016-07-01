@@ -5,23 +5,24 @@ import java.awt.image.Raster;
 /**
  * Created by Filip-PC on 31.05.2016.
  */
-public class MeanSquareError extends QualityMeasure {
+public class MaximumDifference extends QualityMeasure {
 
     @Override
     public double calculate(Raster result, Raster reference) {
-        double sum = 0;
+        double current = 0;
         for (int i = result.getMinY(); i < result.getMinY() + result.getHeight(); i++) {
             for (int j = result.getMinX(); j < result.getMinX() + result.getWidth(); j++) {
-                sum += Math.pow(
-                        reference.getPixel(j, i, new double[reference.getNumBands()])[0] -
-                                result.getPixel(j, i, new double[result.getNumBands()])[0], 2);
+                double ref = reference.getPixel(j, i, new double[reference.getNumBands()])[0];
+                double res = result.getPixel(j, i, new double[result.getNumBands()])[0];
+                double diff = Math.abs(ref - res);
+                if (diff > current) current = diff;
             }
         }
-        return sum / (result.getHeight() * result.getWidth());
+        return current;
     }
 
     @Override
     public String name() {
-        return "Mean Square Error";
+        return "Maximum Difference";
     }
 }

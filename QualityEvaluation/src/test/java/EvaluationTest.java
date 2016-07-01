@@ -7,8 +7,9 @@ public class EvaluationTest {
 
     public static void main(String[] args) throws IOException {
         Evaluation.main(new String[]{
-                "C:\\Users\\Filip-PC\\OneDrive\\sem8\\oi\\esa\\test-environment\\TestImages\\result.png",
-                "C:\\Users\\Filip-PC\\OneDrive\\sem8\\oi\\esa\\test-environment\\TestImages\\original.png"
+                "sm",
+                "C:\\Users\\Filip-PC\\OneDrive\\sem8\\oi\\esa\\test-environment\\oi-testenv\\environment2\\solutions\\simple-solution\\results",
+                "C:\\Users\\Filip-PC\\OneDrive\\sem8\\oi\\esa\\test-environment\\oi-testenv\\environment2\\run\\test_data\\references"
         });
     }
 }
