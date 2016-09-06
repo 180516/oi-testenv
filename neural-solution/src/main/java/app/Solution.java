@@ -28,7 +28,7 @@ public class Solution {
     }
 
     public Solution(int bands) {
-        this.neuralNetwork = new Perceptron(bands, 1, TransferFunctionType.TANH);
+        this.neuralNetwork = new Perceptron(bands, 1, TransferFunctionType.LINEAR);
         neuralNetwork.randomizeWeights();
     }
 
@@ -77,6 +77,10 @@ public class Solution {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void load(String path) {
+        neuralNetwork.load(path);
     }
 
     private double[] normalize(int... input) {
