@@ -27,8 +27,13 @@ import java.util.stream.Stream;
 
 public class Solution {
     private NeuralNetwork neuralNetwork;
-    private final int radius;
-    private final int inputVectorSize;
+    private int radius;
+    private int inputVectorSize;
+
+    public Solution(File path, int radius) {
+        this.radius = radius;
+        this.neuralNetwork = NeuralNetwork.createFromFile(path);
+    }
 
     public Solution(int bands, int radius, int... hiddenLayersNeurons) {
         this.radius = radius;
@@ -57,7 +62,7 @@ public class Solution {
                 output.setRGB(j, i, new Color(neuralOutput, neuralOutput, neuralOutput).getRGB());
             }
         }
-
+        MedianFilter.filter(output);
         return output;
     }
 
@@ -117,5 +122,9 @@ public class Solution {
 
     private int[] getPixelsBlock(BSQImage image, InMemoryPixels pixels, int x, int y, int radius) {
         return IntStream.rangeClosed(x-radius, x+radius).mapToObj(i -> IntStream.rangeClosed(y-radius, y+radius).mapToObj(j -> getPixelsInput(image, pixels, i, j)).reduce(new int[]{}, ArrayUtils::addAll)).reduce(new int[]{}, ArrayUtils::addAll);
+    }
+
+    public void save(String path) {
+        neuralNetwork.save(path);
     }
 }

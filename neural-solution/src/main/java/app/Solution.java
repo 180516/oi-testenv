@@ -23,8 +23,12 @@ import java.util.stream.Stream;
 public class Solution {
     private NeuralNetwork neuralNetwork;
 
+    public Solution(File path) {
+        this.neuralNetwork = NeuralNetwork.createFromFile(path);
+    }
+
     public Solution(int bands) {
-        this.neuralNetwork = new Perceptron(bands, 1, TransferFunctionType.SIGMOID);
+        this.neuralNetwork = new Perceptron(bands, 1, TransferFunctionType.TANH);
         neuralNetwork.randomizeWeights();
     }
 
@@ -35,10 +39,17 @@ public class Solution {
             for (int i = 0; i < image.dimension().height; i++) {
                 for (int j = 0; j < image.dimension().width; j++) {
                     float neuralOutput = (float) getNeuralOutput(normalize(pixels.get(j, i)));
+                    neuralOutput = (neuralOutput + 1.f) / 2.f;
+                    if (neuralOutput > 0.15f) {
+                        neuralOutput = 1.f;
+                    } else {
+                        neuralOutput = 0.f;
+                    }
                     output.setRGB(j, i, new Color(neuralOutput, neuralOutput, neuralOutput).getRGB());
                 }
             }
         }
+        MedianFilter.filter(output);
         return output;
     }
 
@@ -84,5 +95,9 @@ public class Solution {
         neuralNetwork.setInput(input);
         neuralNetwork.calculate();
         return neuralNetwork.getOutput()[0];
+    }
+
+    public void save(String path) {
+        neuralNetwork.save(path);
     }
 }
