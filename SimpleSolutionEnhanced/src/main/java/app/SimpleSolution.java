@@ -52,6 +52,11 @@ public class SimpleSolution {
                 new FileInputStream(new File(solutionDirectory, "land-sea-boundary.txt"))))) {
             borderValue = Integer.valueOf(reader.readLine());
         }
+        int maskSize;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new FileInputStream(new File(solutionDirectory, "median-filter-mask-size.txt"))))) {
+            maskSize = Integer.valueOf(reader.readLine());
+        }
 
         File resultsDirectory = new File(solutionDirectory, "results");
         resultsDirectory.mkdir();
@@ -65,7 +70,7 @@ public class SimpleSolution {
             BufferedImage bufferedImage = analyzeLandSea(imageFile, propFile, borderValue);
 
             ImageFromFile imageFromFile = new ImageFromFile(bufferedImage);
-            MedianFilteredImage medianFilteredImage = new MedianFilteredImage(imageFromFile, 5);
+            MedianFilteredImage medianFilteredImage = new MedianFilteredImage(imageFromFile, maskSize);
             BufferedImage bufferedImage1 = new PostProcessedImage(medianFilteredImage).toBufferedImage();
 
             ImageIO.write(bufferedImage1,
