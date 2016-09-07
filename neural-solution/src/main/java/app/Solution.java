@@ -32,7 +32,7 @@ public class Solution {
         neuralNetwork.randomizeWeights();
     }
 
-    public BufferedImage generate(BSQImage image) throws Exception {
+    public BufferedImage generate(BSQImage image, String type) throws Exception {
         BufferedImage output =
                 new BufferedImage(image.dimension().width, image.dimension().height, BufferedImage.TYPE_BYTE_GRAY);
         try (BSQPixels pixels = image.pixels()) {
@@ -40,12 +40,22 @@ public class Solution {
                 for (int j = 0; j < image.dimension().width; j++) {
                     float neuralOutput = (float) getNeuralOutput(normalize(pixels.get(j, i)));
                     neuralOutput = (neuralOutput + 1.f) / 2.f;
-                    if (neuralOutput > 0.15f) {
-                        neuralOutput = 1.f;
-                    } else {
-                        neuralOutput = 0.f;
+                    if (type.equals("sm") && neuralOutput < 0.1f) {
+                        neuralOutput = 1f;
+                    } else if (type.equals("ls")) {
+                        if (neuralOutput > 0.15f) {
+                            neuralOutput = 1;
+                        } else {
+                            neuralOutput = 0;
+                        }
                     }
-                    output.setRGB(j, i, new Color(neuralOutput, neuralOutput, neuralOutput).getRGB());
+                    if (neuralOutput > 1f) {
+                        neuralOutput = 1;
+                    } else if (neuralOutput < 0f) {
+                        neuralOutput = 0;
+                    }
+
+                    output.setRGB(j, i, new Color(1 - neuralOutput, 1 - neuralOutput, 1 - neuralOutput).getRGB());
                 }
             }
         }
@@ -88,11 +98,11 @@ public class Solution {
     }
 
     private double map(double x, double a, double b, double c, double d) {
-        return (x-a)/(b-a)*(d-c)+c;
+        return (x - a) / (b - a) * (d - c) + c;
     }
 
     private double[] getFirstChannel(int... channels) {
-        return new double[] {normalize(channels)[0]};
+        return new double[]{normalize(channels)[0]};
     }
 
     private double getNeuralOutput(double[] input) {

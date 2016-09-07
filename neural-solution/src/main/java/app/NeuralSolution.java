@@ -99,7 +99,7 @@ public class NeuralSolution {
                 width = Integer.valueOf(reader.readLine());
                 height = Integer.valueOf(reader.readLine());
                 System.out.println(String.format("Starting testing %s", file.getName()));
-                BufferedImage imageOutput = solution.generate(new BSQImage(file, bands, new Dimension(width, height)));
+                BufferedImage imageOutput = solution.generate(new BSQImage(file, bands, new Dimension(width, height)), dataType);
                 ImageIO.write(imageOutput, "png", new File(resultDirectory, file.getName().replace(".bsq", ".png")));
             } catch (Exception e) {
                 e.printStackTrace();

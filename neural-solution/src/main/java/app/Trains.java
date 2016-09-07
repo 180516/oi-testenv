@@ -6,7 +6,7 @@ package app;
 public class Trains {
     public static void main(String[] args) throws Exception {
         NeuralSolution.main(new String[]{
-                "C:\\Users\\Filip-PC\\OneDrive\\sem8\\oi\\esa\\test-environment\\oi-testenv\\environment2\\run\\data\\sm",
-                "sm", "train"});
+                "C:\\Users\\Filip-PC\\OneDrive\\sem8\\oi\\esa\\test-environment\\oi-testenv\\environment2\\run\\data\\ls",
+                "ls", "train"});
     }
 }
