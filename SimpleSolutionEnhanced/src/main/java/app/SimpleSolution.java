@@ -16,14 +16,21 @@ import java.nio.file.Paths;
 
 public class SimpleSolution {
 
+    private static String dataType;
+
     public static void main(String[] args) throws Exception {
-        //if (args.length != 2) throw new IllegalArgumentException("Invalid arguments count");
+        if (args.length != 2) {
+            throw new IllegalArgumentException("Invalid arguments count");
+        }
         File dataDirectory = new File(args[0]);
-        if (!dataDirectory.isDirectory()) throw new IllegalArgumentException("Given path is not directory");
-        new SimpleSolution().run(new File(dataDirectory, "test"), "ls");
+        dataType = args[1];
+        if (!dataDirectory.isDirectory()) {
+            throw new IllegalArgumentException("Given path is not directory");
+        }
+        new SimpleSolution().run(new File(dataDirectory, "test"));
     }
 
-    private void run(File dataDirectory, String dataType) throws Exception {
+    private void run(File dataDirectory) throws Exception {
         File solutionDirectory = getClass().getClassLoader().getResource(".") != null ?
                 new File(getClass().getClassLoader().getResource(".").getPath()) :   //debug
                 Paths.get(".").toFile();    //release
@@ -32,21 +39,25 @@ public class SimpleSolution {
         if (dataFilesCount % 2 == 0) throw new IllegalStateException("Odd data files size");
         int picturesCount = (dataFilesCount - 1) / 2;
 
-        runLandSeaAnalysis(dataDirectory, solutionDirectory, picturesCount);
+        runAnalysis(dataDirectory, solutionDirectory, picturesCount);
     }
 
-    private BufferedImage analyzeLandSea(File imageFile, File propFile, int borderValue) throws Exception {
+    private BufferedImage analyze(File imageFile, File propFile, int borderValue) throws Exception {
         int bands, width, height;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(propFile)))) {
             bands = Integer.valueOf(reader.readLine());
             width = Integer.valueOf(reader.readLine());
             height = Integer.valueOf(reader.readLine());
         }
-
-        return new LandSeaSolution(new BSQImage(imageFile, bands, new Dimension(width, height)), borderValue).generate();
+        if(dataType.equals("ls")) {
+            return new LandSeaSolution(new BSQImage(imageFile, bands, new Dimension(width, height)), borderValue).generate();
+        }
+        else {
+            return new SoilMoistureSolution(new BSQImage(imageFile, bands, new Dimension(width, height))).generate();
+        }
     }
 
-    private void runLandSeaAnalysis(File dataDirectory, File solutionDirectory, int picturesCount) throws Exception {
+    private void runAnalysis(File dataDirectory, File solutionDirectory, int picturesCount) throws Exception {
         int borderValue;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
                 new FileInputStream(new File(solutionDirectory, "land-sea-boundary.txt"))))) {
@@ -67,7 +78,7 @@ public class SimpleSolution {
             File imageFile = new File(dataDirectory, (i + 1) + ".bsq");
             File propFile = new File(dataDirectory, (i + 1) + ".txt");
             long start = System.currentTimeMillis();
-            BufferedImage bufferedImage = analyzeLandSea(imageFile, propFile, borderValue);
+            BufferedImage bufferedImage = analyze(imageFile, propFile, borderValue);
 
             ImageFromFile imageFromFile = new ImageFromFile(bufferedImage);
             MedianFilteredImage medianFilteredImage = new MedianFilteredImage(imageFromFile, maskSize);
