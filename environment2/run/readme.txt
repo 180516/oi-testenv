@@ -13,4 +13,4 @@ gdzie * to numer zdjecia (numeracja ci¹g³a, od 1)
 
 katalog zawiera rozwiazanie w formie:
 plik wykonywalny Solution.jar, przyjmujacy 2 parametry: sciezke do katalogu z analizowanymi danymi i typ przeprowadzanej analizy (ls|ms)
-program generuje jako rozwiazanie jednokanalowe maski w formacie .png i zapisuje je w katalogu results, ktory znajduje sie w katalogu z programem Solution.jar
+program generuje jako rozwiazanie obrazy w formacie .png i zapisuje je w katalogu results, ktory znajduje sie w katalogu z programem Solution.jar
