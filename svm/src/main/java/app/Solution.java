@@ -29,7 +29,7 @@ public class Solution {
         this.model = svm.svm_load_model(path.getAbsolutePath());
     }
 
-    public Solution(int radius) {
+    public Solution(int radius, String dataType) {
         this.radius = radius;
 
         param = new svm_parameter();
@@ -37,13 +37,17 @@ public class Solution {
         param.gamma = 0.5;
         param.nu = 0.5;
         param.C = 1;
-        param.svm_type = svm_parameter.C_SVC;
+        if ("ls".equals(dataType)) {
+            param.svm_type = svm_parameter.C_SVC;
+        } else {
+            param.svm_type = svm_parameter.EPSILON_SVR;
+        }
         param.kernel_type = svm_parameter.LINEAR;
         param.cache_size = 20000;
         param.eps = 0.001;
     }
 
-    public BufferedImage generate(BSQImage image) throws Exception {
+    public BufferedImage generate(BSQImage image, String dataType) throws Exception {
         BufferedImage output =
                 new BufferedImage(image.dimension().width, image.dimension().height, BufferedImage.TYPE_BYTE_GRAY);
         InMemoryPixels pixels = image.inMemoryPixels();
@@ -52,11 +56,18 @@ public class Solution {
                 float neuralOutput = (float) getNeuralOutput(normalize(
                         getPixelsBlock(image, pixels, j, i, radius)
                 ));
-                neuralOutput = (neuralOutput + 1.f) / 2.f;
+                if ("sm".equals(dataType)) {
+                    neuralOutput = neuralOutput > 0.001 ? neuralOutput * 4.7f : .0f;
+                }
+                if (neuralOutput > 1.f) {
+                    neuralOutput = 1.f;
+                }
+                if (neuralOutput < 0.f) {
+                    neuralOutput = 0.f;
+                }
                 output.setRGB(j, i, new Color(neuralOutput, neuralOutput, neuralOutput).getRGB());
             }
         }
-        MedianFilter.filter(output);
         return output;
     }
 
@@ -95,7 +106,7 @@ public class Solution {
     }
 
     private double[] normalize(int... input) {
-        return Arrays.stream(input).mapToDouble(i -> i).map(x -> map(x, 0, 255, -1.0, 1.0)).toArray();
+        return Arrays.stream(input).mapToDouble(i -> i).map(x -> map(x, 0, 255, 0.0, 1.0)).toArray();
     }
 
     private double map(double x, double a, double b, double c, double d) {

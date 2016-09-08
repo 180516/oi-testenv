@@ -19,10 +19,10 @@ public class NeuralSolution {
         if (!dataType.equals("ls") && !dataType.equals("sm")) throw new IllegalArgumentException("Illegal data type");
         File neuralFile = new File(args[2]);
         if (neuralFile.isDirectory()) throw new IllegalArgumentException("Expected neural path to be a file, not a directory");
-        new NeuralSolution().run(dataDirectory, neuralFile);
+        new NeuralSolution().run(dataDirectory, neuralFile, dataType);
     }
 
-    private void run(File dataDirectory, File neuralFile) throws Exception {
+    private void run(File dataDirectory, File neuralFile, String dataType) throws Exception {
         File solutionDirectory;
         if (getClass().getClassLoader().getResource(".") != null)
             solutionDirectory = new File(getClass().getClassLoader().getResource(".").getPath());   //debug
@@ -73,7 +73,7 @@ public class NeuralSolution {
                 width = Integer.valueOf(reader.readLine());
                 height = Integer.valueOf(reader.readLine());
                 System.out.println(String.format("Starting testing %s", file.getName()));
-                BufferedImage imageOutput = solution.generate(new BSQImage(file, bands, new Dimension(width, height)));
+                BufferedImage imageOutput = solution.generate(new BSQImage(file, bands, new Dimension(width, height)), dataType);
                 ImageIO.write(imageOutput, "png", new File(resultDirectory, file.getName().replace(".bsq", ".png")));
             } catch (Exception e) {
                 e.printStackTrace();

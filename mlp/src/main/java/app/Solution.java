@@ -49,7 +49,7 @@ public class Solution {
         neuralNetwork.randomizeWeights();
     }
 
-    public BufferedImage generate(BSQImage image) throws Exception {
+    public BufferedImage generate(BSQImage image, String dataType) throws Exception {
         BufferedImage output =
                 new BufferedImage(image.dimension().width, image.dimension().height, BufferedImage.TYPE_BYTE_GRAY);
         InMemoryPixels pixels = image.inMemoryPixels();
@@ -62,7 +62,9 @@ public class Solution {
                 output.setRGB(j, i, new Color(neuralOutput, neuralOutput, neuralOutput).getRGB());
             }
         }
-        MedianFilter.filter(output);
+        if ("ls".equals(dataType)) {
+            MedianFilter.filter(output);
+        }
         return output;
     }
 
